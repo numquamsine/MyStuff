@@ -1,0 +1,239 @@
+Sub FullRun()
+Dim VariableSheetName As String
+VariableSheetName = InputBox("Sheet Name", "Enter Sheet Name", "")
+    Sheets.Add.Name = VariableSheetName
+Range("A1").Value = VariableSheetName
+Dim VariableTickerSymbol As String
+VariableTickerSymbol = InputBox("Ticker Symbol", "Enter Ticker Symbol", "")
+Range("A2").Value = VariableTickerSymbol
+Range("A4") = "Market Information"
+Range("A5") = "Market Cap"
+Range("A6") = "Share Price"
+Range("A7") = "Average Volume"
+Range("A8") = "Shares Outstanding"
+Range("A9") = "52 Week High/Low"
+Range("A11") = "Internal Financials ($Thsnds)"
+Range("A12") = "Revenue, Last 3 Yrs"
+Range("A13") = "Net, Last 3 Yrs"
+Range("A14") = "Cash Flow, Past Yr"
+Range("A15") = "Cash, Last Qtr"
+Range("A16") = "Current Assets, Last Qtr"
+Range("A17") = "Curent Liabilities, Last Qtr"
+Range("A19") = "Description"
+
+Dim URL1 As String
+Dim URL2 As String
+Dim URL3 As String
+Dim URL4 As String
+
+' The default URL for financial statements at Yahoo is quarterly. Annual must be specified in the URL
+Dim VariableMakeISAnnual As String
+    VariableMakeISAnnual = "+Income+Statement&annual"
+
+' Market Data URL from Yahoo.com (Query 1 of 4)
+URL1 = "http://finance.yahoo.com/q?s="
+' Income Statement URL from Yahoo.com (Query 2 of 4)
+URL2 = "http://finance.yahoo.com/q/is?s="
+' Cash Flow Statement URL from Yahoo.com (Query 3 of 4)
+URL3 = "http://finance.yahoo.com/q/cf?s="
+' Balance Sheet URL from Yahoo.com (Query 4 of 4)
+URL4 = "http://finance.yahoo.com/q/bs?s="
+
+
+' Query 1 of 4: Fetching Market Data
+    With ActiveSheet.QueryTables.Add(Connection:= _
+        "URL;" & URL1 & VariableTickerSymbol, Destination:=Range("H45"))
+        .Name = "MarketData"
+        .FieldNames = True
+        .RowNumbers = False
+        .FillAdjacentFormulas = False
+        .PreserveFormatting = True
+        .RefreshOnFileOpen = False
+        .BackgroundQuery = False
+        .RefreshStyle = xlOverwriteCells
+        .SavePassword = False
+        .SaveData = True
+        .AdjustColumnWidth = True
+        .RefreshPeriod = 0
+        .WebSelectionType = xlSpecifiedTables
+        .WebTables = "table1,table2"
+        .WebFormatting = xlWebFormattingNone
+        .WebPreFormattedTextToColumns = True
+        .WebConsecutiveDelimitersAsOne = True
+        .WebSingleBlockTextImport = False
+        .WebDisableDateRecognition = False
+        .WebDisableRedirections = False
+        .Refresh BackgroundQuery:=False
+    End With
+
+' Query 2 of 4: Fetching Income Statement
+    With ActiveSheet.QueryTables.Add(Connection:= _
+        "URL;" & URL2 & VariableTickerSymbol & VariableMakeISAnnual, Destination:=Range("A45"))
+        .Name = "IncomeStatement"
+        .FieldNames = True
+        .RowNumbers = False
+        .FillAdjacentFormulas = False
+        .PreserveFormatting = True
+        .RefreshOnFileOpen = False
+        .BackgroundQuery = False
+        .RefreshStyle = xlOverwriteCells
+        .SavePassword = False
+        .SaveData = True
+        .AdjustColumnWidth = True
+        .RefreshPeriod = 0
+        .WebSelectionType = xlSpecifiedTables
+        .WebTables = "9"
+        .WebFormatting = xlWebFormattingAll
+        .WebPreFormattedTextToColumns = True
+        .WebConsecutiveDelimitersAsOne = True
+        .WebSingleBlockTextImport = False
+        .WebDisableDateRecognition = False
+        .WebDisableRedirections = False
+        .Refresh BackgroundQuery:=False
+    End With
+    
+' Query 3 of 4: Fetching Cash Flow
+    With ActiveSheet.QueryTables.Add(Connection:= _
+        "URL;" & URL3 & VariableTickerSymbol, Destination:=Range("A90"))
+        .Name = "CashFlow"
+        .FieldNames = True
+        .RowNumbers = False
+        .FillAdjacentFormulas = False
+        .PreserveFormatting = True
+        .RefreshOnFileOpen = False
+        .BackgroundQuery = False
+        .RefreshStyle = xlOverwriteCells
+        .SavePassword = False
+        .SaveData = True
+        .AdjustColumnWidth = True
+        .RefreshPeriod = 0
+        .WebSelectionType = xlSpecifiedTables
+        .WebFormatting = xlWebFormattingAll
+        .WebTables = "9"
+        .WebPreFormattedTextToColumns = True
+        .WebConsecutiveDelimitersAsOne = True
+        .WebSingleBlockTextImport = False
+        .WebDisableDateRecognition = False
+        .WebDisableRedirections = False
+        .Refresh BackgroundQuery:=False
+    End With
+    
+    
+' Query 4 of 4: Fetching Balance Sheet
+    With ActiveSheet.QueryTables.Add(Connection:= _
+        "URL;" & URL4 & VariableTickerSymbol, Destination:=Range("H90"))
+        .Name = "BalanceSheet"
+        .FieldNames = True
+        .RowNumbers = False
+        .FillAdjacentFormulas = False
+        .PreserveFormatting = True
+        .RefreshOnFileOpen = False
+        .BackgroundQuery = False
+        .RefreshStyle = xlOverwriteCells
+        .SavePassword = False
+        .SaveData = True
+        .AdjustColumnWidth = True
+        .RefreshPeriod = 0
+        .WebSelectionType = xlSpecifiedTables
+        .WebFormatting = xlWebFormattingAll
+        .WebTables = "9"
+        .WebPreFormattedTextToColumns = True
+        .WebConsecutiveDelimitersAsOne = True
+        .WebSingleBlockTextImport = False
+        .WebDisableDateRecognition = False
+        .WebDisableRedirections = False
+        .Refresh BackgroundQuery:=False
+        End With
+Call Gateway
+End Sub
+Private Sub Gateway()
+Range("E46,D82,F119,M94,M100,M117").Select
+If Range("C82,C120,J138").Value <> 0 Or Range("C82,C120,J138").Value = "-" Then
+    Call FormatStatements
+    Else
+
+    Call Gateway
+End If
+End Sub
+
+Private Sub FormatStatements()
+
+    Range( _
+        "C46:E47,C49:E49,C52:E55,C57:E57,C60:E60,C63:E68,C70:E70,C73:E76,C79:E80,C82:E82,C91:F91,C94:F99,C101:F101,C104:F106,C108:F108,C111:F114,C116:F117,C119:F119,J94:M98,J100:M107,J109:M109,J113:M115,J117:M119,J117:M122,J124:M124,J127:M134,J136:M136,J138:M138" _
+        ).Select
+    Range("J138").Activate
+    Selection.NumberFormat = "#,#0_);[Red](#,#0)"
+    
+    Columns("C:F").Select
+    Columns("C:F").EntireColumn.AutoFit
+
+    Columns("J:M").Select
+    Columns("J:M").EntireColumn.AutoFit
+    
+Range("A20:G43").Select
+    Selection.Merge
+    With Selection
+        .HorizontalAlignment = xlLeft
+        .VerticalAlignment = xlTop
+        .WrapText = True
+        .Orientation = 0
+        .AddIndent = False
+        .IndentLevel = 1
+        .ShrinkToFit = False
+        .ReadingOrder = xlContext
+        .MergeCells = True
+    End With
+
+
+' Filling Market Data with formulas
+' Market Cap formula
+Range("C5").FormulaR1C1 = _
+    "=WEBSERVICE(""http://finance.yahoo.com/d/quotes.csv?s=""&R[-3]C[-2]&""&f=j1"")"
+' Share Price formula
+Range("C6").FormulaR1C1 = _
+    "=WEBSERVICE(""http://finance.yahoo.com/d/quotes.csv?s=""&R[-4]C[-2]&""&f=l1"")"
+' Average Volume formula
+Range("C7").FormulaR1C1 = _
+    "=WEBSERVICE(""http://finance.yahoo.com/d/quotes.csv?s=""&R[-5]C[-2]&""&f=a2"")"
+' Shares outstanding formula
+Range("C8").FormulaR1C1 = _
+    "=WEBSERVICE(""http://finance.yahoo.com/d/quotes.csv?s=""&R[-6]C[-2]&""&f=j2"")"
+' 52 Week Low/High Formulas
+Range("C9").FormulaR1C1 = _
+    "=WEBSERVICE(""http://finance.yahoo.com/d/quotes.csv?s=""&R[-7]C[-2]&""&f=j"")"
+Range("D9").FormulaR1C1 = _
+    "=WEBSERVICE(""http://finance.yahoo.com/d/quotes.csv?s=""&R[-7]C[-3]&""&f=k"")"
+
+' Filling Internal Financials Section
+' Pasting Revenue
+Range("C46:E46").Copy
+Range("C12:E12").PasteSpecial
+' Pasting Net Income Last 3 Years
+Range("C82:E82").Copy
+Range("C13:E13").PasteSpecial
+' Pasting Cash Flow Last 12mos
+Range("C119:E119").Copy
+Range("C14:E14").PasteSpecial
+' Pasting Cash Last qtr
+Range("J94:M94").Copy
+Range("C15:E15").PasteSpecial
+' Pasting Current Asets Last Qtr
+Range("J100:M100").Copy
+Range("C16:E16").PasteSpecial
+' Pasting Current Liabilities Last Qtr
+Range("J117:M117").Copy
+Range("C17:E17").PasteSpecial
+
+Range("C12:F17").Font.Bold = False
+Range("A1,A2,A4,A11,A19").Select
+With Selection.Font
+    .Size = "16"
+    .Bold = True
+Range("A1").Select
+End With
+End Sub
+
+
+
+
+
